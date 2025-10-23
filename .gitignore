@@ -177,6 +177,7 @@ CLAUDE.local.md
 
 # Claude Code personal settings
 .claude/settings.local.json
+spec-kit/.claude/
 
 # Standalone mode files
 .zen_venv/
@@ -188,3 +189,7 @@ logs/
 /worktrees/
 test_simulation_files/
 .mcp.json
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md

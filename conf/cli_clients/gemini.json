@@ -2,6 +2,8 @@
   "name": "gemini",
   "command": "gemini",
   "additional_args": [
+    "--telemetry",
+    "false",
     "--yolo"
   ],
   "env": {},

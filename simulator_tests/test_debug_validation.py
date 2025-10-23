@@ -39,8 +39,8 @@ class DebugValidationTest(ConversationBaseTest):
             if not self._test_single_investigation_session():
                 return False
 
-            # Test 2: Investigation flow that requires refinement
-            if not self._test_investigation_refine_flow():
+            # Test 2: Investigation with backtracking
+            if not self._test_investigation_with_backtracking():
                 return False
 
             # Test 3: Complete investigation with expert analysis
@@ -230,13 +230,13 @@ RuntimeError: dictionary changed size during iteration
             self.logger.error(f"Single investigation session test failed: {e}")
             return False
 
-    def _test_investigation_refine_flow(self) -> bool:
-        """Test investigation flow that requires refining the approach"""
+    def _test_investigation_with_backtracking(self) -> bool:
+        """Test investigation with backtracking to revise findings"""
         try:
-            self.logger.info("  1.2: Testing investigation refinement workflow")
+            self.logger.info("  1.2: Testing investigation with backtracking")
 
-            # Start a new investigation for testing refinement behaviour
-            self.logger.info("    1.2.1: Start investigation for refinement test")
+            # Start a new investigation for testing backtracking
+            self.logger.info("    1.2.1: Start investigation for backtracking test")
             response1, continuation_id = self.call_mcp_tool(
                 "debug",
                 {
@@ -251,7 +251,7 @@ RuntimeError: dictionary changed size during iteration
             )
 
             if not response1 or not continuation_id:
-                self.logger.error("Failed to start refinement test investigation")
+                self.logger.error("Failed to start backtracking test investigation")
                 return False
 
             # Step 2: Wrong direction
@@ -277,11 +277,11 @@ RuntimeError: dictionary changed size during iteration
                 return False
 
             # Step 3: Backtrack from step 2
-            self.logger.info("    1.2.3: Step 3 - Refine investigation path")
+            self.logger.info("    1.2.3: Step 3 - Backtrack and revise approach")
             response3, _ = self.call_mcp_tool(
                 "debug",
                 {
-                    "step": "Refocusing - the issue might not be database related. Let me investigate the data processing algorithm instead.",
+                    "step": "Backtracking - the issue might not be database related. Let me investigate the data processing algorithm instead.",
                     "step_number": 3,
                     "total_steps": 4,
                     "next_step_required": True,
@@ -291,23 +291,24 @@ RuntimeError: dictionary changed size during iteration
                     "relevant_context": ["DataProcessor.process_batch"],
                     "hypothesis": "Inefficient algorithm causing performance issues",
                     "confidence": "medium",
+                    "backtrack_from_step": 2,  # Backtrack from step 2
                     "continuation_id": continuation_id,
                 },
             )
 
             if not response3:
-                self.logger.error("Failed to refine investigation")
+                self.logger.error("Failed to backtrack")
                 return False
 
             response3_data = self._parse_debug_response(response3)
             if not self._validate_step_response(response3_data, 3, 4, True, "pause_for_investigation"):
                 return False
 
-            self.logger.info("    ✅ Investigation refinement working correctly")
+            self.logger.info("    ✅ Backtracking working correctly")
             return True
 
         except Exception as e:
-            self.logger.error(f"Investigation refinement test failed: {e}")
+            self.logger.error(f"Backtracking test failed: {e}")
             return False
 
     def _test_complete_investigation_with_analysis(self) -> bool:
